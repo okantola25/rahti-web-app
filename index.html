@@ -1,11 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Rahti Web App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cloud Services Assignment</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: auto;
+            padding: 30px;
+            background-color: #f5f5f5;
+            color: #222;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 30px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+        }
+
+        section {
+            background: #ffffff;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .screenshot {
+            max-width: 100%;
+            margin: 15px 0;
+        }
+
+        footer {
+            padding: 20px 0;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Hello from Rahti!</h1>
-    <p>This web page is running in a container on CSC Rahti.</p>
-    <p>Cloud Services Week 2</p>
+
+<header>
+    <h1>Cloud Services Assignment</h1>
+
+    <p>
+        This webpage documents my work for the cloud services assignment.
+        The webpage is deployed using CSC Rahti.
+    </p>
+</header>
+
+
+<section>
+    <h2>1. Describe reasons why so many (most?) companies are using cloud based email and calendar services</h2>
+
+    <p>
+        Many companies use cloud email and calendars because they are easier to manage than running their own servers. The cloud provider handles the servers, maintenance and updates. Employees can access their email and calendar from different devices and locations. It is also easy to add or remove users when the company grows. Microsoft Exchange Online, for example, provides hosted email and calendar services for businesses.
+    </p>
+</section>
+
+
+<section>
+    <h2>2. What would a mid-size company store to the Amazon Glacier? What not? Why? What other large cloud backup or mass storage providers are there?</h2>
+
+    <p>
+        A mid-size company could use Amazon S3 Glacier for old backups, archived documents and other data that does not need to be accessed often. It is not a good choice for files that are needed every day because some Glacier storage classes require the data to be restored before it can be accessed. Other cloud storage providers include Microsoft Azure Blob Storage, Google Cloud Storage, Backblaze B2 and Wasabi.
+    </p>
+</section>
+
+
+<section>
+    <h2>3. Select and describe 2-3 well-known Amazon S3 data leak incidents. What went wrong? List some automated S3 bucket search engines and attack tools (don't try the tools, illegal!)</h2>
+
+    <p>
+        In the Verizon incident, customer information was exposed because an S3 bucket used by a Verizon partner was publicly accessible. Another example is Accenture, where several S3 buckets were found publicly accessible and contained sensitive credentials and other information. Tools such as GrayhatWarfare and S3Scanner can be used to find exposed storage, but they should only be used for authorized security testing.
+    </p>
+</section>
+
+
+<section>
+    <h2>4. Compare few cloud data storage provider features and pricing (either for home users or for enterprises)</h2>
+
+    <p>
+        Microsoft OneDrive gives 5 GB for free. Its Microsoft 365 Basic plan gives 100 GB for $1.99/month, while Microsoft 365 Personal gives 1 TB for $9.99/month and also includes Office applications. Dropbox has 2 GB for free. Its Plus plan gives 2 TB for $9.99/month. Dropbox also has business plans with features such as team folders, administration and advanced security. In my opinion, Google One is good for people already using Google services, while OneDrive is useful for people who use Microsoft Office. Dropbox is more focused on file sharing and collaboration. The best choice depends on how much storage is needed and which other services the user already uses. 
+    </p>
+</section>
+
+
+<section>
+    <h2>Rahti Deployment</h2>
+
+    <p>
+        I reused my previous Rahti web application for this assignment.
+        The webpage is deployed in a container running on CSC Rahti.
+    </p>
+
+    <h3>Deployment process</h3>
+
+</section>
+
+
+
+<footer>
+    <p>
+        Cloud Services Assignment — CSC Rahti
+    </p>
+</footer>
+
 </body>
 </html>
