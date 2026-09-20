@@ -135,6 +135,141 @@
 
     <p id="api-result">Loading backend data...</p>
 </section>
+<section>
+    <h2>Week 4 - Application description</h2>
+
+    <p>
+        I deployed a three-container application to CSC Rahti. The application
+        consists of a frontend, a Node.js/Express backend and a MySQL database.
+    </p>
+
+    <p>
+        The frontend communicates with the backend using a REST API. The backend
+        connects to MySQL, writes data to the database and reads the stored data.
+        Kubernetes Services are used for communication between the containers.
+    </p>
+
+    <p>
+        Configuration such as the database host, user and database name is stored
+        in a ConfigMap. Database passwords are stored in a Secret. MySQL uses a
+        PersistentVolumeClaim so that the database data is not lost when the
+        MySQL Pod is replaced.
+    </p>
+</section>
+<section>
+    <h2>Week 4 - Database persistence</h2>
+
+    <p>
+        I tested MySQL persistence by first checking the visit count stored in
+        the database. The count was 4. I then manually deleted the MySQL Pod
+        from Rahti.
+    </p>
+
+    <p>
+        Kubernetes automatically created a new MySQL Pod. After the new Pod
+        started, I opened the application again and the visit count increased
+        to 5 instead of starting again from 1. This showed that the database
+        data survived the Pod replacement.
+    </p>
+
+    <p>
+        The MySQL data is stored using a 1 GiB PersistentVolumeClaim called
+        mysql-data. The storage exists separately from the MySQL Pod, so
+        replacing the Pod does not remove the stored database data.
+    </p>
+</section>
+<section>
+    <h2>Week 4 - Pod recovery</h2>
+
+    <p>
+        I tested automatic Pod recovery by manually deleting the running
+        backend Pod. The old backend Pod was backend-84df85fcb9-rg9zj.
+    </p>
+
+    <p>
+        After deleting it, Kubernetes automatically created a replacement Pod
+        called backend-84df85fcb9-w2srv. The application continued working
+        after the replacement.
+    </p>
+
+    <p>
+        This happens because the backend is managed by a Kubernetes Deployment.
+        The Deployment keeps the requested number of backend replicas running.
+        When a Pod is deleted, Kubernetes detects that a replica is missing
+        and creates a new Pod.
+    </p>
+</section>
+<section>
+    <h2>Week 4 - Backend scaling</h2>
+
+    <p>
+        I tested scaling by increasing the backend Deployment from one replica
+        to three replicas. Rahti created three running backend Pods. I then
+        scaled the Deployment back to one replica.
+    </p>
+
+    <p>
+        The frontend does not need to know the IP addresses of the individual
+        backend Pods. Requests to /api are routed to the backend Service, which
+        forwards requests to the available backend Pods. This allows Pods to
+        be added, removed or replaced without changing the frontend.
+    </p>
+</section>
+<section>
+    <h2>Week 4 - Application update</h2>
+
+    <p>
+        I tested application updates by modifying the application, building new
+        Docker images and pushing the new image versions to Docker Hub.
+    </p>
+
+    <p>
+        The backend was updated to version 1.0.2 and the frontend was updated
+        to version 1.0.2. I then updated the Rahti Deployments to use the new
+        images. Kubernetes performed a rolling update and replaced the old Pods
+        with Pods running the new versions.
+    </p>
+
+    <p>
+        The rollout status showed that the Deployments were successfully
+        updated. This allows a new application version to be deployed without
+        manually deleting and recreating all of the Pods.
+    </p>
+</section>
+<section>
+    <h2>Week 4 - Problems and solutions</h2>
+
+    <p>
+        One problem was that the frontend Route returned a 503 error even
+        though the frontend container was running. I tested the Pod and Service
+        to find the problem. I changed Apache to listen on port 8080 and
+        configured the frontend Service to forward port 80 to port 8080. I also
+        configured the Route to use the named HTTP Service port. After these
+        changes, the public frontend Route worked correctly.
+    </p>
+
+    <p>
+        I also had a SQL syntax error in the backend when testing the MySQL
+        connection. I checked the backend logs, corrected the SQL query and
+        built a new backend image. After deploying the new image, the backend
+        could successfully communicate with MySQL.
+    </p>
+</section>
+<section>
+    <h2>Week 4 - Rahti compared with Docker Compose and CPouta</h2>
+
+    <p>
+        In the previous assignment I used Docker Compose to run the containers
+        on a CPouta virtual machine. In Rahti the containers are managed using
+        Kubernetes resources such as Deployments, Services and Routes.
+    </p>
+
+    <p>
+        Rahti also makes it easier to scale the application and automatically
+        replace failed Pods. MySQL data is stored using a PersistentVolumeClaim,
+        so the data stays even if the database Pod is replaced.
+    </p>
+</section>
 
 <script>
     fetch("/api")
