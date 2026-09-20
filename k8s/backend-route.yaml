@@ -1,0 +1,12 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: backend-api
+spec:
+  host: frontend-rahti-web-app-test.2.rahtiapp.fi
+  path: /api
+  to:
+    kind: Service
+    name: backend
+  port:
+    targetPort: 8000

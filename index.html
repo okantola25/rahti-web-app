@@ -125,6 +125,31 @@
         alt="Rahti deployment showing 3 pods">
 </section>    
     
+<section>
+    <h2>Week 4 - Three-container application</h2>
+
+    <p>
+        This section retrieves data from the backend REST API.
+        The backend connects to the MySQL database.
+    </p>
+
+    <p id="api-result">Loading backend data...</p>
+</section>
+
+<script>
+    fetch("/api")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("api-result").textContent =
+                data.message + " | Database time: " + data.database_time;
+        })
+        .catch(error => {
+            document.getElementById("api-result").textContent =
+                "Could not connect to backend.";
+            console.error(error);
+        });
+</script>
+
 <footer>
     <p>
         Cloud Services Assignment — CSC Rahti
