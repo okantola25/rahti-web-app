@@ -140,8 +140,11 @@
     fetch("/api")
         .then(response => response.json())
         .then(data => {
-            document.getElementById("api-result").textContent =
-                data.message + " | Database time: " + data.database_time;
+            document.getElementById("api-result").innerHTML =
+                "Backend: " + data.message + "<br>" +
+                "Database write: " + data.database_write + "<br>" +
+                "Database time: " + data.database_time + "<br>" +
+                "Visit count stored in MySQL: " + data.visit_count;
         })
         .catch(error => {
             document.getElementById("api-result").textContent =
