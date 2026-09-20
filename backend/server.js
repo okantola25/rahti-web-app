@@ -9,19 +9,18 @@ app.get("/api", async (req, res) => {
         const db = await mysql.createConnection({
             host: process.env.DB_HOST || "db",
             user: process.env.DB_USER || "appuser",
-            password: process.env.DB_PASSWORD || "apppassword",
+            password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME || "appdb"
         });
 
-        const [rows] = await db.execute("SELECT NOW() AS current_time");
+        const [rows] = await db.execute("SELECT NOW() AS db_time");
 
         await db.end();
 
         res.json({
             message: "Backend is working",
-            database_time: rows[0].current_time
+            database_time: rows[0].db_time
         });
-
     } catch (error) {
         console.error(error);
 
