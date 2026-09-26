@@ -271,6 +271,96 @@
     </p>
 </section>
 
+<section>
+    <h2>Week 5 - Part A Questions</h2>
+
+    <h3>1. What is a Web Application Firewall (WAF)?</h3>
+
+    <p>
+        A Web Application Firewall protects web applications by checking HTTP
+        traffic before it reaches the application. It can help block attacks
+        such as SQL injection, cross-site scripting and other malicious requests.
+    </p>
+
+    <p>
+        In my Week 4 application I would place the WAF before the public Route.
+        This means requests would be checked before they reach the frontend,
+        backend and MySQL database.
+    </p>
+
+
+    <h3>2. What is YAML and why is it used with Kubernetes/Rahti?</h3>
+
+    <p>
+        YAML is a text format used for configuration files. In Kubernetes and
+        Rahti it is used to describe resources such as Deployments, Services,
+        Routes, ConfigMaps and PersistentVolumeClaims. I used YAML files for
+        these resources in my Week 4 application.
+    </p>
+
+    <p>
+        YAML is similar to JSON, but it usually uses indentation instead of
+        brackets and many quotation marks. I find YAML easier to read for
+        Kubernetes configuration, while JSON is commonly used when applications
+        exchange data through APIs.
+    </p>
+
+
+    <h3>3. Public APIs and my Week 4 backend</h3>
+
+    <p>
+        Public APIs allow an application to get information or services from
+        another application over the internet. Some examples are weather APIs,
+        currency exchange APIs, map APIs and public transport APIs.
+    </p>
+
+    <p>
+        A realistic addition to my Week 4 application would be a weather API.
+        The backend could request weather information for a city and return it
+        to the frontend as JSON. The frontend could then display the current
+        weather together with the data from my own backend.
+    </p>
+
+
+    <h3>4. What is the difference between SAML and OAuth?</h3>
+
+    <p>
+        SAML is mainly used for authentication and single sign-on, especially
+        in companies. For example, an employee could use the same company
+        account to sign in to several different services.
+    </p>
+
+    <p>
+        OAuth is mainly used to give an application limited access to another
+        service without giving it the user's password. It is commonly used with
+        services such as Google or GitHub. A company could use SAML for
+        enterprise single sign-on, while OAuth is useful when an application
+        needs permission to access another service on behalf of a user.
+    </p>
+</section>
+<section>
+    <h2>Week 5 - Part B - Redis Cache</h2>
+
+    <p>
+        I added Redis caching to my Week 4 application. Redis runs in its own
+        container in Rahti and the backend connects to it using a Kubernetes
+        Service.
+    </p>
+
+    <p>
+        The backend first checks Redis for the visit count. If the value is not
+        cached, it reads the count from MySQL and stores it in Redis for 30
+        seconds. The next request can then get the value from Redis instead of
+        querying MySQL again.
+    </p>
+
+    <p>
+        I tested the cache by sending two requests to the API. The first request
+        showed "cache_source: database" and the second request showed
+        "cache_source: redis". This showed that the Redis cache was working.
+    </p>
+</section>
+
 <script>
     fetch("/api")
         .then(response => response.json())
@@ -279,7 +369,8 @@
                 "Backend: " + data.message + "<br>" +
                 "Database write: " + data.database_write + "<br>" +
                 "Database time: " + data.database_time + "<br>" +
-                "Visit count stored in MySQL: " + data.visit_count;
+                "Visit count stored in MySQL: " + data.visit_count + "<br>" +
+                "Cache source: " + data.cache_source;
         })
         .catch(error => {
             document.getElementById("api-result").textContent =
@@ -287,6 +378,43 @@
             console.error(error);
         });
 </script>
+
+<section>
+    <h2>Sources</h2>
+
+    <p>
+        <strong>CSC - Rahti Documentation</strong><br>
+        <a href="https://docs.csc.fi/cloud/rahti/" target="_blank">
+            https://docs.csc.fi/cloud/rahti/
+        </a><br>
+        General information about deploying and managing applications in Rahti.
+    </p>
+
+    <p>
+        <strong>Kubernetes - Deployments</strong><br>
+        <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/" target="_blank">
+            https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+        </a><br>
+        Information about Deployments, replicas, Pod recovery, scaling and rolling updates.
+    </p>
+
+    <p>
+        <strong>Docker - Docker Compose</strong><br>
+        <a href="https://docs.docker.com/compose/" target="_blank">
+        https://docs.docker.com/compose/
+        </a><br>
+        Information about running and managing multi-container applications with Docker Compose.
+    </p>
+
+    <p>
+        <strong>Redis - Documentation</strong><br>
+        <a href="https://redis.io/docs/latest/" target="_blank">
+        https://redis.io/docs/latest/
+        </a><br>
+        Information about Redis and using Redis as a cache.
+    </p>
+
+</section>
 
 <footer>
     <p>

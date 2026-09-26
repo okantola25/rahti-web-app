@@ -1,19 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
-  name: frontend
+  name: redis
+
 spec:
   replicas: 1
+
   selector:
     matchLabels:
-      app: frontend
+      app: redis
+
   template:
     metadata:
       labels:
-        app: frontend
+        app: redis
+
     spec:
       containers:
-        - name: frontend
-          image: okantola25/cloud-services-frontend:1.0.4
+        - name: redis
+          image: redis:7-alpine
           ports:
-            - containerPort: 8080
+            - containerPort: 6379

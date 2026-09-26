@@ -1,8 +1,25 @@
 const express = require("express");
 const mysql = require("mysql2/promise");
+const { createClient } = require("redis");
 
 const app = express();
 const port = 8000;
+
+// Connect to Redis using the Redis Service in Rahti
+const redis = createClient({
+    url: process.env.REDIS_URL || "redis://redis:6379"
+});
+
+redis.on("error", (error) => {
+    console.error("Redis error:", error);
+});
+
+async function startRedis() {
+    await redis.connect();
+    console.log("Connected to Redis");
+}
+
+startRedis();
 
 app.get("/api", async (req, res) => {
     try {
@@ -28,7 +45,7 @@ app.get("/api", async (req, res) => {
             ["Frontend visited the backend"]
         );
 
-        // Read data from the database
+        // Read latest visit from the database
         const [rows] = await db.execute(`
             SELECT id, message, created_at
             FROM visits
@@ -36,9 +53,26 @@ app.get("/api", async (req, res) => {
             LIMIT 1
         `);
 
-        const [countRows] = await db.execute(
-            "SELECT COUNT(*) AS visit_count FROM visits"
-        );
+        // Check Redis for cached visit count
+        let visitCount = await redis.get("visit_count");
+        let cacheSource;
+
+        if (visitCount !== null) {
+            cacheSource = "redis";
+        } else {
+            const [countRows] = await db.execute(
+                "SELECT COUNT(*) AS visit_count FROM visits"
+            );
+
+            visitCount = countRows[0].visit_count;
+
+            // Store count in Redis for 30 seconds
+            await redis.set("visit_count", visitCount.toString(), {
+                EX: 30
+            });
+
+            cacheSource = "database";
+        }
 
         await db.end();
 
@@ -46,14 +80,15 @@ app.get("/api", async (req, res) => {
             message: "Backend is working",
             database_write: rows[0].message,
             database_time: rows[0].created_at,
-            visit_count: countRows[0].visit_count
+            visit_count: Number(visitCount),
+            cache_source: cacheSource
         });
 
     } catch (error) {
         console.error(error);
 
         res.status(500).json({
-            error: "Database operation failed"
+            error: "Backend operation failed"
         });
     }
 });
