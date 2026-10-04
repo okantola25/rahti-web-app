@@ -393,7 +393,76 @@
         secrets and the workflow can access them when it runs without putting the actual values in the code.
     </p>
 </section>
+<section>
+    <h2>Week 6 - Part B - CI/CD and Observability</h2>
 
+    <h3>CI/CD pipeline</h3>
+    <p>
+        I created a GitHub Actions workflow that runs automatically when changes
+        are pushed to the main branch. The workflow builds the backend Docker image,
+        pushes the image to Docker Hub and deploys the new image to Rahti.
+    </p>
+
+    <p>
+        Each automatically built image uses the Git commit SHA as its image tag.
+        This makes it possible to identify which Git commit is running in Rahti.
+        The workflow successfully completed the build, push and deployment steps,
+        and the Rahti backend Deployment was updated to the new image.
+    </p>
+
+    <h3>CI/CD secrets</h3>
+    <p>
+        Credentials are not stored directly in the GitHub Actions workflow.
+        The Docker Hub username, Docker Hub access token and Rahti token are stored
+        as GitHub repository secrets. The workflow accesses these secrets only when
+        authentication is required.
+    </p>
+
+    <h3>Health checks</h3>
+    <p>
+        I added a /healthz endpoint to the backend and configured both liveness
+        and readiness probes in the backend Deployment. The probes send HTTP
+        requests to /healthz on port 8000. When the backend is healthy, the
+        endpoint returns HTTP status 200.
+    </p>
+
+    <h3>Readiness probe failure experiment</h3>
+    <p>
+        To test the readiness probe, I temporarily changed its path from /healthz
+        to /wrong-health. The new backend Pod remained in Running state but showed
+        0/1 Ready because the readiness check failed. The previous ready Pod remained
+        available during the rollout. After changing the path back to /healthz,
+        the Deployment successfully rolled out and the backend returned to 1/1 Ready.
+    </p>
+
+    <h3>Logging and observability</h3>
+    <p>
+        I added structured request logging to the backend. Each request records the
+        HTTP method, request path, status code and response time in milliseconds.
+        I verified the logs with oc logs and could see repeated /healthz requests
+        returning status 200 together with their response times.
+    </p>
+
+    <h3>Problems and solutions</h3>
+    <p>
+        During the deployment, my Rahti login session expired and oc could not apply
+        the Deployment because the server requested credentials. I solved this by
+        logging into Rahti again and obtaining a new login session.
+    </p>
+
+    <p>
+        I also initially tried to access /healthz through the public frontend Route.
+        This did not work because the public Route points to the frontend Service,
+        while /healthz belongs to the internal backend. The Kubernetes probes can
+        access the backend health endpoint directly inside the cluster.
+    </p>
+
+    <p>
+        Another problem occurred when Docker Desktop was not running, which prevented
+        the Docker CLI from connecting to the Docker engine. Starting Docker Desktop
+        solved the problem and allowed the backend image to be built and pushed.
+    </p>
+</section>
 <script>
     fetch("/api")
         .then(response => response.json())
