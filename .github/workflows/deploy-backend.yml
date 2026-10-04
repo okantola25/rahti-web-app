@@ -1,0 +1,56 @@
+name: Build and Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build backend image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/cloud-services-backend:${{ github.sha }} \
+            ./backend
+
+      - name: Push backend image
+        run: |
+          docker push \
+            ${{ secrets.DOCKERHUB_USERNAME }}/cloud-services-backend:${{ github.sha }}
+
+      - name: Install OpenShift CLI
+        run: |
+          curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
+          tar -xzf openshift-client-linux.tar.gz
+          sudo mv oc /usr/local/bin/oc
+
+      - name: Log in to Rahti
+        run: |
+          oc login \
+            --token="${{ secrets.RAHTI_TOKEN }}" \
+            --server="https://api.2.rahti.csc.fi:6443"
+
+      - name: Select Rahti project
+        run: |
+          oc project rahti-web-app-test
+
+      - name: Deploy new backend image
+        run: |
+          oc set image deployment/backend \
+            backend=${{ secrets.DOCKERHUB_USERNAME }}/cloud-services-backend:${{ github.sha }}
+
+      - name: Wait for rollout
+        run: |
+          oc rollout status deployment/backend --timeout=180s

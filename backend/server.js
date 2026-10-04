@@ -21,6 +21,31 @@ async function startRedis() {
 
 startRedis();
 
+// Structured logging for request path, status and response time
+app.use((req, res, next) => {
+    const start = Date.now();
+
+    res.on("finish", () => {
+        const responseTime = Date.now() - start;
+
+        console.log(JSON.stringify({
+            method: req.method,
+            path: req.path,
+            status: res.statusCode,
+            response_time_ms: responseTime
+        }));
+    });
+
+    next();
+});
+
+// Health endpoint for Kubernetes probes
+app.get("/healthz", (req, res) => {
+    res.status(200).json({
+        status: "ok"
+    });
+});
+
 app.get("/api", async (req, res) => {
     try {
         const db = await mysql.createConnection({

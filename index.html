@@ -360,6 +360,39 @@
         "cache_source: redis". This showed that the Redis cache was working.
     </p>
 </section>
+<section>
+    <h2>Week 6 - Part A - Questions</h2>
+
+    <h3>1. What is the difference between Continuous Integration, Continuous Delivery and Continuous Deployment?</h3>
+    <p>
+        Continuous Integration means that changes are automatically built and tested when code is pushed.
+        Continuous Delivery also prepares and publishes the application so it is ready to be deployed.
+        Continuous Deployment goes one step further and automatically deploys successful changes without
+        needing someone to deploy them manually.
+    </p>
+
+    <h3>2. How is a GitHub Actions workflow structured?</h3>
+    <p>
+        A GitHub Actions workflow contains triggers, jobs and steps. A trigger decides when the workflow
+        starts, for example when code is pushed to the main branch. Jobs define the work that will run,
+        and steps contain the individual commands. For my application, the pipeline can build the backend
+        Docker image, push it to a container registry and then deploy the new image to Rahti.
+    </p>
+
+    <h3>3. What is the difference between a liveness probe and a readiness probe?</h3>
+    <p>
+        A liveness probe checks if a container is still working. If it keeps failing, Kubernetes can restart
+        the container. A readiness probe checks if the application is ready to receive requests. If it fails,
+        the Pod is temporarily removed from the Service endpoints until it becomes ready again.
+    </p>
+
+    <h3>4. Why should secrets never be hard-coded into a CI/CD pipeline?</h3>
+    <p>
+        Tokens and passwords should not be written directly in a workflow file because the file is stored
+        in Git and could expose the credentials. GitHub Actions can store sensitive values as repository
+        secrets and the workflow can access them when it runs without putting the actual values in the code.
+    </p>
+</section>
 
 <script>
     fetch("/api")
