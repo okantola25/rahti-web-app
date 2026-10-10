@@ -44,7 +44,7 @@ jobs:
 
       - name: Select Rahti project
         run: |
-          oc project rahti-web-app-test
+          oc project cloud-services-2021458
 
       - name: Deploy new backend image
         run: |
