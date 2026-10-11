@@ -463,6 +463,235 @@
         solved the problem and allowed the backend image to be built and pushed.
     </p>
 </section>
+<section>
+    <h2>Week 7 - Part A - Infrastructure as Code</h2>
+
+    <h3>1. What is Infrastructure as Code (IaC)?</h3>
+    <p>
+        Infrastructure as Code means managing cloud infrastructure using
+        configuration files instead of creating everything manually.
+        Tools such as OpenTofu can automatically create virtual machines,
+        networks, security groups and other resources.
+        The configuration can be stored in Git and reused.
+    </p>
+
+    <h3>2. What is the difference between declarative and imperative configuration?</h3>
+    <p>
+        Declarative configuration describes the desired final state.
+        OpenTofu compares this state with the existing infrastructure
+        and determines which changes are needed.
+        Imperative configuration describes the individual commands
+        required to perform a task.
+    </p>
+
+    <h3>3. What is the OpenTofu state file?</h3>
+    <p>
+        The state file records information about infrastructure resources
+        managed by OpenTofu. It allows OpenTofu to compare existing
+        resources with the configuration and calculate changes.
+        State files should not be committed to a public Git repository
+        because they can contain sensitive information.
+    </p>
+
+    <h3>4. What is cloud-init?</h3>
+    <p>
+        Cloud-init is used to automatically configure a virtual machine
+        when it starts. It can install software, create files and run
+        commands. I used cloud-init to install Apache and create my
+        Week 7 webpage automatically.
+    </p>
+</section>
+
+<section>
+    <h2>Week 7 - Part B - OpenTofu Deployment</h2>
+
+    <h3>Infrastructure setup</h3>
+    <p>
+        I used OpenTofu to deploy a virtual machine to CSC cPouta.
+        The configuration uses the OpenStack provider and my CSC
+        project network.
+    </p>
+
+    <p>
+        My infrastructure includes an Ubuntu 24.04 virtual machine,
+        a standard.tiny flavor, an SSH key pair, a network port,
+        a security group and a floating IP address.
+    </p>
+
+    <p>
+        The security group allows HTTP traffic on port 80 from
+        anywhere. SSH access on port 22 is restricted to my own
+        public IP address.
+    </p>
+
+    <h3>Configuration files</h3>
+    <p>
+        I created the following files in the week7-terraform directory:
+    </p>
+
+    <ul>
+        <li><strong>versions.tf:</strong> Defines the OpenStack provider.</li>
+        <li><strong>variables.tf:</strong> Defines configurable input variables.</li>
+        <li><strong>terraform.tfvars:</strong> Contains my project-specific settings.</li>
+        <li><strong>main.tf:</strong> Defines the infrastructure resources.</li>
+        <li><strong>cloud-init.yaml:</strong> Installs and configures Apache.</li>
+        <li><strong>outputs.tf:</strong> Displays the public IP and website URL.</li>
+    </ul>
+
+    <h3>Deployment commands</h3>
+    <p>
+        First, I initialized the project using
+        <code>tofu init</code>.
+        Then I checked the configuration with
+        <code>tofu validate</code> and
+        <code>tofu plan</code>.
+    </p>
+
+    <p>
+        The initial plan showed seven resources to create.
+        I ran <code>tofu apply</code>, and OpenTofu successfully
+        created all seven resources.
+    </p>
+
+    <p>
+        Cloud-init automatically installed Apache and created
+        a webpage displaying my name and Week 7 information.
+    </p>
+
+    <h3>Website</h3>
+    <p>
+        My OpenTofu-managed website is available at:
+        <a href="http://86.50.23.254" target="_blank">
+            http://86.50.23.254
+        </a>
+    </p>
+</section>
+
+<section>
+    <h2>Week 7 - Experiments</h2>
+
+    <h3>Experiment 1 - Infrastructure consistency</h3>
+    <p>
+        <strong>Prediction:</strong>
+        Running tofu plan without changing the configuration
+        should show that no changes are required.
+    </p>
+    <p>
+        <strong>Result:</strong>
+        OpenTofu reported:
+        "No changes. Your infrastructure matches the configuration."
+    </p>
+    <p>
+        <strong>Explanation:</strong>
+        OpenTofu compared the configuration with its state
+        and the existing cloud resources. Everything matched,
+        so no new actions were needed.
+    </p>
+
+    <h3>Experiment 2 - Updating the webpage</h3>
+    <p>
+        <strong>Prediction:</strong>
+        Changing the cloud-init configuration would cause
+        OpenTofu to replace the virtual machine.
+    </p>
+    <p>
+        <strong>Result:</strong>
+        After changing the webpage message, tofu plan showed
+        one resource to destroy and one to create.
+        Running tofu apply replaced the virtual machine.
+        The webpage displayed "Week 7 - Updated using OpenTofu".
+    </p>
+    <p>
+        <strong>Explanation:</strong>
+        The virtual machine's user_data changed.
+        The OpenStack provider treats this change as requiring
+        instance replacement, so OpenTofu recreated the VM.
+    </p>
+    
+    <h3>Experiment - Configuration Drift</h3>
+
+    <p><strong>Prediction:</strong> If I manually rename the VM in
+    the cPouta dashboard, OpenTofu should detect the change.</p>
+
+    <p><strong>Action:</strong> I renamed the VM from
+    week7-web-vm to week7-web-vm-manual using the cPouta
+    web interface and ran tofu plan.</p>
+
+    <p><strong>Result:</strong> OpenTofu detected the change:</p>
+
+    <pre>~ name = "week7-web-vm-manual" -> "week7-web-vm"
+    Plan: 0 to add, 1 to change, 0 to destroy.</pre>
+
+    <p>I ran tofu apply to restore the original name:</p>
+
+    <pre>Apply complete! Resources: 0 added, 1 changed, 0 destroyed.</pre>
+
+    <p><strong>Explanation:</strong> OpenTofu detected configuration
+    drift and corrected it using an in-place update. The VM
+    was not recreated, and its public IP remained unchanged.
+    This experiment does not establish whether OpenTofu
+    detects every possible manual change.</p>
+
+    <h3>Experiment 3 - Destroying and recreating infrastructure</h3>
+    <p>
+        <strong>Prediction:</strong>
+        Running tofu destroy would remove all managed resources,
+        and running tofu apply again would recreate them.
+    </p>
+    <p>
+        <strong>Result:</strong>
+        OpenTofu successfully destroyed all seven resources.
+        I then ran tofu apply again, which recreated all seven
+        resources. The new public IP address was 86.50.23.254.
+        The website worked again after recreation.
+    </p>
+    <p>
+        <strong>Explanation:</strong>
+        The infrastructure is defined in configuration files,
+        so OpenTofu can recreate the environment without
+        manually configuring the cloud resources.
+    </p>
+</section>
+
+<section>
+    <h2>Week 7 - Reflection and Problems</h2>
+
+    <p>
+        This assignment demonstrated how Infrastructure as Code
+        makes cloud infrastructure reproducible. Instead of
+        manually creating a virtual machine and its networking,
+        I could deploy the entire environment with OpenTofu.
+    </p>
+
+    <p>
+        One problem was that my CSC project initially had no
+        available network or floating IP quota. After activating
+        the cPouta service, the project network became available
+        and I could continue.
+    </p>
+
+    <p>
+        I also needed to create an SSH key pair and configure
+        my public IP address for restricted SSH access.
+        I used a Git ignore file to prevent OpenTofu state
+        files and local variable files from being committed
+        to GitHub.
+    </p>
+
+    <p>
+        The most useful experiment was destroying and recreating
+        the infrastructure. It showed that the same configuration
+        could successfully rebuild the entire web server.
+    </p>
+
+    <p>
+        My OpenTofu configuration is stored in my
+        <a href="https://github.com/okantola25/rahti-web-app/tree/main/week7-terraform"
+           target="_blank">
+            GitHub repository
+        </a>.
+    </p>
+</section>
 <script>
     fetch("/api")
         .then(response => response.json())
