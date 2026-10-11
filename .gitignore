@@ -1,2 +1,10 @@
 k8s/secret.yaml
 backend/node_modules/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+*.tfplan
+crash.log
+*openrc*

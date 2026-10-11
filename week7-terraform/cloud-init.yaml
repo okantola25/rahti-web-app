@@ -1,0 +1,24 @@
+#cloud-config
+package_update: true
+
+packages:
+  - apache2
+
+write_files:
+  - path: /var/www/html/index.html
+    permissions: '0644'
+    content: |
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Week 7 - Cloud Services</title>
+      </head>
+      <body>
+        <h1>${student_name}</h1>
+        <h2>${page_message}</h2>
+        <p>This web server was created automatically using OpenTofu and cloud-init on CSC cPouta.</p>
+      </body>
+      </html>
+
+runcmd:
+  - systemctl enable --now apache2
